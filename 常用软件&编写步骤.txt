@@ -1,0 +1,16 @@
+MyEclipse for development
+Tomcat: Local Server
+访问 http://localhost:8080/EnterpriseEMS/ page所在directory
+
+pdshell/powerdesigner/sybass：数据库结构设计
+navicat：数据库access / SQL Server 直接access
+java development kit/jdk 1.7 & jre7
+
+
+SpringMVC新创建功能常规步骤
+创建domain，class， constructor+getter+setter
+常规模板创建 service，dao
+classMap.xml， map table column到java class attribute & 写具体需要调用的SQL语句
+mybatis.xml： 加入新建的class地址和alias 
+web-info：写edit，list，add页面。 jsp具体前端可以看到的code
+controller：控制各页面，按钮的操作，获取前段输入的variable，调用后台service的方法，functionName根据Map内各方法的id决定
