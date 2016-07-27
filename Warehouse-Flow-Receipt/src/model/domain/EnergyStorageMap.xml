@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sbzy.enterpriseems.model.domain.EnergyStorage">
+    <resultMap type="energystorage" id="energystorageMap">
+         <id property="id" column="ID"/>
+         <result property="maxValue" column="MaxValue"/>
+         <result property="minValue" column="MinValue"/>
+          <result property="entryType" column="EntryType"/>
+             
+             <association property="unit" column="ID" select="seltionUnitbyid">
+              <id property="ID" column="ID"/>
+     		   <result property="Name" column="Name" /> 
+             </association>
+    </resultMap>
+ 
+    <insert id="insert" parameterType="energystorage">
+			insert into EnergyStorage(ID,MaxValue,MinValue,EntryType) 
+			values(#{id},#{maxValue},#{minValue},#{entryType})
+    </insert>
+    <!-- 更新数据 -->
+     <update id="update"  parameterType="energystorage">     
+			update EnergyStorage set MaxValue=#{maxValue},MinValue=#{minValue},EntryType=#{entryType}
+			where ID=#{id}
+    </update> 
+    <!-- 删除数据 -->
+    <delete id="delete" parameterType="int">
+			delete  from EnergyStorage where ID=#{id}
+    </delete>
+    <!-- 查询所有数据 -->
+    <select  id="selectOneRecord"  resultMap="energystorageMap"  parameterType="int" >
+			select ID,MaxValue,MinValue,EntryType   from EnergyStorage
+    </select>
+    
+    <!-- 查询所有数据 -->
+    <select  id="selectList"  resultMap="energystorageMap"  parameterType="java.util.HashMap">
+			select ID,MaxValue,MinValue,EntryType  from EnergyStorage where ID in(select ID from EnergyAccountUnit where BarCode like #{orgcode}+'%') 
+			
+			 <if test="unitid != null and unitid != '' and unitid != 0">
+				and ID=#{unitid}
+			 </if>
+			 
+			 
+    </select>
+     <!-- 根据主键ID查询数据 -->
+    <select  id="selectOneR"  resultMap="energystorageMap"  parameterType="int" >
+            
+			select ID,MaxValue,MinValue,EntryType from EnergyStorage where ID=#{id}
+		                                                                   
+    </select>
+     <!-- 根据能源核算单元查询对象 -->
+    <select  id="seltionUnitbyid"  resultType="sbzy.enterpriseems.model.domain.EnergyAccountUnit"  parameterType="int" >
+            
+			select * from EnergyAccountUnit  where ID=#{id}
+		                                                                   
+    </select>
+</mapper>
+
+
+
+

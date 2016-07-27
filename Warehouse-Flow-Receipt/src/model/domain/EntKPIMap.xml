@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+<mapper namespace="sbzy.enterpriseems.model.domain.EntKPI" >
+    <resultMap type="sbzy.enterpriseems.model.domain.EntKPI" id="entkpiMap">
+         <id property="ID" column="ID"/>
+         <result property="KPIID" column="KPIID"/>
+         <result property="EntID" column="EntID"/>
+          <result property="EntKPIName" column="EntKPIName"/>
+    </resultMap>    
+    
+    <!-- 插入数据 -->
+    <insert id="insert" parameterType="sbzy.enterpriseems.model.domain.EntKPI" useGeneratedKeys="true" keyProperty="ID">
+     
+			insert into EntKPI(KPIID, EntID, EntKPIName) 
+			values(#{KPIID},#{EntID},#{EntKPIName})
+		
+    </insert>
+    <!-- 更新数据 -->
+     <update id="update"  parameterType="sbzy.enterpriseems.model.domain.EntKPI">     
+    
+			update EntKPI set KPIId=#{KPIID},EntKPIName=#{EntKPIName},EntID=#{EntID}
+			where ID=#{ID}
+		   
+    </update> 
+    <!-- 删除数据 -->
+    <delete id="delete" parameterType="int">
+    
+			delete  from EntKPI where ID=#{id}
+		
+    </delete>
+    
+    <!-- 条件查询,得到一条记录 -->
+    <select  id="selectOneRecord"  resultMap="entkpiMap"  parameterType="int" >
+    
+			select ID, KPIID, EntID, EntKPIName from EntKPI  where ID=#{id}
+		
+    </select>
+    
+    <select  id="selectlist"  resultMap="entkpiMap"   >
+    
+			select * from EntKPI
+		
+    </select>
+    
+    <select  id="selectListByWhere"  resultMap="entkpiMap"  parameterType="java.util.HashMap" >
+                
+			select ID, KPIID, EntID, EntKPIName      
+			from  EntKPI              
+			 <where>
+			 <if test="KPIID != null and KPIID != ''">   
+              and KPIID = #{KPIID}
+            </if>
+			 <if test="EntID != null and EntID != ''" >
+			 and EntID = #{EntID}
+			 </if>
+			 <if test="name != null and name != ''">
+			  and EntKPIName like '%'+#{name}+'%'
+			 </if>
+			 </where>                   
+		
+    </select>
+</mapper>
+
+
+
+

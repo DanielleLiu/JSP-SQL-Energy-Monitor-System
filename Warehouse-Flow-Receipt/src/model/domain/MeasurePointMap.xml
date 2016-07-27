@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.MeasurePoint">
+    <resultMap type="measurePoint" id="MeasurePointMap">
+        <id property="ID" column="ID"/>
+        <result property="PID" column="PID"/>
+        <result property="name" column="Name"/>
+        <result property="kind" column="Kind"/>
+        <result property="EnergyDirection" column="EnergyDirection"/>
+        <result property="UnitID" column="UnitID"/>
+         <result property="ispoint" column="ispoint"/>
+         <result property="EnterEnergyName" column="EnterEnergyName"/>
+         <result property="MeaterName" column="MeaterName"/>
+         <result property="SumDim" column="SumDim"/>
+         <result property="EntityValue" column="EntityValue"/>
+         <result property="StandardValue" column="StandardValue"/>
+         <result property="EntityAdjValue" column="EntityAdjValue"/>
+         <result property="StandardAdjValue" column="StandardAdjValue"/>
+         <result property="mID" column="mID"/> 
+         <result property="cname" column="cname"/>
+         
+         
+        <association property="energyAccountUnit" column="UnitID" select="selectChildListByWheretwo" >  
+        <id property="ID" column="ID"/>
+        <result property="BarCode" column="BarCode"/>  
+        <result property="Name" column="Name" /> 
+        </association>
+         
+        <association property="energyMeasurePoint" column="ID" select="selectEnergyMeasruePoint" >
+        <id property="ID" column="ID"/>
+        <result property="EnergyID" column="EnergyID"/>
+        <result property="MesID" column="MesID"/>
+        </association> 
+         
+    </resultMap>
+    
+     <resultMap type="measurePoint" id="MeasurePointMap1">
+        <id property="ID" column="ID"/>
+        <result property="name" column="Name"/>
+        <result property="kind" column="Kind"/>
+        <result property="EnergyDirection" column="EnergyDirection"/>
+        <result property="UnitID" column="UnitID"/>
+         <collection property="children"  ofType="measurePoint"  
+         select="selectChildListByWhere" column="{ID=ID,name=Name,kind=Kind,EnergyDirection=EnergyDirection,UnitID=UnitID}">  
+         </collection>
+        
+        
+    </resultMap>
+
+<!-- 获取规划计量点的最大ID值 -->
+<select  id="selectmeasurepointMax"  resultMap="MeasurePointMap"  parameterType="int" >
+            
+			 select ID from  MeasurePoint where ID=(select max(id) from MeasurePoint) 
+			
+		
+  </select>
+  
+  <select  id="selectmeasurepointEnergyList"  resultMap="MeasurePointMap"  parameterType="java.util.HashMap" >
+            select mp.ID,mp.Name, mp.Kind,mp.EnergyDirection,mp.UnitID  from 
+			MeasurePoint      mp,
+			EnergyAccountUnit e,
+			EnergyAccountUnit e1 ,
+			EnergyMeasurePoint EP,
+			EntEnergy          EE
+		
+		    where  mp.UnitID=e.ID 
+				   and  EP.MesID=mp.id 
+				   and EP.EnergyID=EE.ID 
+				   and e.BarCode like e1.BarCode+'%' 
+                   and mp.Kind=1 
+          
+          <if test="unitID!=null and unitID!=''">and e1.ID=#{unitID}</if> 
+         
+		 <if test="energyID!=null and energyID!=''">and EE.ID=#{energyID}</if>  	
+		 
+		 <if test="name!=null and name!=''">and mp.name   like  '%'+#{name}+'%'</if> 
+		    
+		
+  </select>
+  
+  <select  id="selectmeasurepointProductList"  resultMap="MeasurePointMap"  parameterType="java.util.HashMap" >
+            select mp.ID,mp.Name, mp.Kind,mp.EnergyDirection,mp.UnitID  from 
+			MeasurePoint      mp,
+			EnergyAccountUnit e,
+			EnergyAccountUnit e1 ,
+			MeaterMeasurePoint mmP,
+			EntMeater em   
+		
+		    where  mp.UnitID=e.ID 
+				   and  mmP.MesID=mp.ID
+				   and mmp.MeaterID=em.ID
+				   and e.BarCode like e1.BarCode+'%' 
+				   and kind=2 
+        
+          
+          <if test="unitID!=null and unitID!=''">and e1.ID=#{unitID}</if> 
+         
+		 <if test="energyID!=null and energyID!=''">and Em.ID=#{energyID}</if>  	
+		 
+		 <if test="name!=null and name!=''">and mp.name   like  '%'+#{name}+'%'</if> 
+		    
+		
+  </select>
+  
+ 
+
+    <sql id="indexColumns"> ID </sql>
+    <sql id="dataColumns"> Name, Kind,EnergyDirection,UnitID </sql>
+    <sql id="allColumns">
+        <include refid="indexColumns"></include>
+        ,
+        <include refid="dataColumns"></include>
+    </sql>
+    <sql id="paramValues"> #{name}, #{kind},#{EnergyDirection},#{UnitID} </sql>
+    <sql id="setParamValues"> Name = #{name}, Kind = #{kind},EnergyDirection=#{EnergyDirection},UnitID=#{UnitID}
+    </sql>
+
+    <!-- 插入单个记录 -->
+    <!-- <insert id="insert" useGeneratedKeys="true" keyProperty="id"> -->
+     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO MeasurePoint(
+        <include refid="dataColumns"></include>
+        ) VALUES ( <include refid="paramValues"></include> );
+    </insert>
+
+    <!-- 更新单个记录 -->
+    <update id="update" parameterType="measurePoint">
+        UPDATE MeasurePoint SET
+        <include refid="setParamValues"></include>
+        WHERE ID = #{ID};
+    </update>
+
+    <!-- 删除一条记录 -->
+    <delete id="delete">
+        DELETE FROM MeasurePoint WHERE ID = #{ID};
+    </delete>
+
+    <!-- 删除多条记录 -->
+    <delete id="deleteAll">
+        <!-- ODO(李昊,2015年7月31日): IN (${}) 应改写为 foreach -->
+        <bind name="delIds" value="_parameter.toString()"/>
+        DELETE FROM MeasurePoint WHERE ID IN (${delIds});
+    </delete>
+
+    <!-- 条件查询,得到全部记录 -->
+    <select id="selectList" resultMap="MeasurePointMap">
+        SELECT
+        <include refid="allColumns"></include>
+        FROM MeasurePoint;
+    </select>
+
+    <!-- 条件查询,得到一条记录 -->
+    <select id="selectOneRecord" resultMap="MeasurePointMap">
+        SELECT
+        <include refid="allColumns"></include>
+        FROM MeasurePoint
+        WHERE
+        ID = #{ID};
+    </select>
+
+<!--获取规划计量点最大ID  -->
+<select id="measurePointMaxID" resultMap="MeasurePointMap" parameterType="java.util.HashMap" >
+        SELECT ID from MeasurePoint  where ID=(Select max(ID) from MeasurePoint)
+        
+    </select>
+
+
+
+    <select id="selectListBynoEnergy" resultMap="MeasurePointMap" parameterType="java.util.HashMap" >
+         select m.ID,m.UnitID,m.Name,m.Kind,m.EnergyDirection from  MeasurePoint m, EnergyAccountUnit e,EnergyMeasurePoint p 
+         where m.UnitID=e.ID and  m.ID = p.MesID  
+           
+          and   m.Kind=1 and  m.ID   not in  (select MPointID from  MeasureCollect )
+         <if test="name!=null and name!=''">
+           and m.Name like #{name}
+         </if>
+		
+		<if test="EnergyID!=null and EnergyID!=''">
+			and p.EnergyID=#{EnergyID}
+		</if>
+		<if test="BarCode!=null and BarCode!=''">
+		 	and e.BarCode like #{BarCode}
+		</if>
+    </select>
+    
+    
+      <select id="selectListBynoproductlist" resultMap="MeasurePointMap" parameterType="java.util.HashMap" >
+         select m.ID,m.UnitID,m.Name,m.Kind,m.EnergyDirection from  MeasurePoint m, EnergyAccountUnit e,EnergyMeasurePoint p 
+         where m.UnitID=e.ID and  m.ID = p.MesID
+         
+          and m.Kind=2 and  m.ID not in  (select MPointID from  MeasureCollect )
+         <if test="name!=null and name!=''">
+           and m.Name like #{name}
+         </if>
+		<if test="Kind!=null and Kind!=''">
+			and m.Kind=#{Kind}
+		</if>
+		<if test="EnergyID!=null and EnergyID!=''">
+			and p.EnergyID=#{EnergyID}
+		</if>
+		<if test="BarCode!=null and BarCode!=''">
+		 	and e.BarCode like #{BarCode}
+		</if>
+    </select>
+
+
+
+    <!-- 条件查询,得到多条记录 -->
+    <select id="selectListByWhere" resultMap="MeasurePointMap" parameterType="java.util.HashMap" >
+         select m.ID,m.UnitID,m.Name,m.Kind,m.EnergyDirection from  MeasurePoint m, EnergyAccountUnit e,EnergyMeasurePoint p where m.UnitID=e.ID and  m.ID = p.MesID
+         <if test="name!=null and name!=''">
+           and m.Name like #{name}
+         </if>
+		<if test="UnitID!=null and UnitID!=''">
+		 	and m.UnitID like #{UnitID}
+		</if>
+		<if test="Kind!=null and Kind!=''">
+			and m.Kind=#{Kind}
+		</if>
+		<if test="EnergyID!=null and EnergyID!=''">
+			and p.EnergyID=#{EnergyID}
+		</if>
+		<if test="BarCode!=null and BarCode!=''">
+		 	and e.BarCode like #{BarCode}
+		</if>
+    </select>
+
+	<select id="selectListByUnit" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+		select mp.ID, mp.UnitID, mp.Name, mp.Kind, mp.EnergyDirection 
+		from MeasurePoint mp, EnergyMeasurePoint emp, EntEnergy ee, Energy e, measureunit mu 
+		where mp.id = emp.mesid and emp.EnergyID = ee.id and ee.energyid = e.id and e.unitid = mu.id 
+		<if test="StandardUnit!=null and StandardUnit!=''"> 
+			and mu.standardunitid = #{StandardUnit}
+		</if>
+		<if test="EntID!=null and EntID!=''">
+			and ee.enterpriseid = #{EntID}
+		</if>
+		<if test="Kind!=null and Kind!=''">
+			and mp.Kind = #{Kind}
+		</if>
+	</select>
+	
+     <!--能源规划点过滤查询特定企业的能源规划点 -->
+     
+     <select id="selectListB" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      <!--  select m.ID,m.Name,m.Kind,m.EnergyDirection,m.UnitID,e.Name, from MeasurePoint m left join EnergyAccountUnit e on m.UnitID=e.ID where Kind=1 -->
+      <!--  select m.ID,m.Name,m.Kind,m.EnergyDirection,m.UnitID,e.Name,en.EnterEnergyName from MeasurePoint m ,EnergyAccountUnit e,EnergyMeasurePoint em,EntEnergy en where m.UnitID=e.ID
+       and m.ID=em.MesID and em.EnergyID=en.ID and Kind=1 -->
+       select m.ID,m.Name,m.Kind,m.EnergyDirection,m.UnitID,e.Name,en.EnterEnergyName FROM EnergyAccountUnit e INNER JOIN
+               MeasurePoint m ON e.ID = m.UnitID left JOIN
+                dbo.EnergyMeasurePoint em ON m.ID = em.MesID left JOIN
+                EntEnergy en ON em.EnergyID = en.ID where m.Kind=1
+     
+         <if test="name!=null and name!=''">
+          and m.Name like '%'+#{name}+'%'
+         </if> 
+      <!--  <if test="UnitID!=null and UnitID!=''">
+        and ${UnitID}
+       </if> -->
+       <if test="BarCode!=null and BarCode!=''">
+        and e.BarCode like #{BarCode}
+       </if>
+       <if test="unitname!=null and unitname!=''">
+        and e.ID=#{unitname}
+       </if>
+       <if test="energy_name!=null and energy_name!=''">
+        and en.ID=#{energy_name}
+       </if>
+    </select>
+    
+    
+    <!--查询特定企业的规划点数据源的规划计量点  -->
+    <select id="selectListmcpoint" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+       select m.* from MeasurePoint m, EnergyAccountUnit e, EnergyAccountUnit e1 where m.UnitID=e.ID and e.BarCode like e1.BarCode+'%' 
+       <if test="EntID!=null and EntID!=''">
+        and ${EntID}
+       </if>
+       <if test="Kind!=null and Kind!=''">
+        and Kind=#{Kind}
+       </if>
+        <if test="UnitID!=null and UnitID!=''">
+        and e1.ID=#{UnitID}
+       </if>
+    </select>
+    
+    
+    <!--规划点验证过滤查询 -->
+    <select id="selectListB1" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+       select m.* from MeasurePoint m, EnergyAccountUnit e, EnergyAccountUnit e1 where m.UnitID=e.ID and e.BarCode like e1.BarCode+'%' and m.ID not in(select MPointID from MeasureCollect)
+       <if test="EntID!=null and EntID!=''">
+        and ${EntID}
+       </if>
+    </select>
+    
+    <!-- 规划点数据来源验证显示 -->
+    <select id="selectListB2" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      
+  <!--  SELECT ID,PID,Name from VSelectMeasurePoint 
+   <if test="barcode!=null and barcode!=''">
+      where   BarCode like #{barcode}+'%'
+    </if> -->
+    
+   select m.* from MeasurePoint m, EnergyAccountUnit e, EnergyAccountUnit e1 where m.UnitID=e.ID and e.BarCode like e1.BarCode+'%' 
+       <if test="EntID!=null and EntID!=''">
+        and ${EntID}
+       </if>
+    
+    </select>
+    
+    <!--验证选中的是能源核算单元还是规划计量点  -->
+   <select id="selectListyanz" resultMap="MeasurePointMap" parameterType="java.util.HashMap">  
+   SELECT ispoint from VSelectMeasurePoint where ispoint=1
+   <if test="ID!=null and ID!=''">
+      and ID=#{ID}
+    </if>
+    </select>
+    
+    
+   
+    <!-- 产品规划点中的规划计量点过滤显示 -->
+    <select id="selectListMeasurePoint" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+       select m.* from MeasurePoint m, EnergyAccountUnit e, EnergyAccountUnit e1 where m.UnitID=e.ID and e.BarCode like e1.BarCode+'%' 
+       <if test="EntID!=null and EntID!=''">
+        and ${EntID}
+       </if>
+       
+      <!--  select mp.* from MeasurePoint mp, MeaterMeasurePoint mmp where mp.ID=mmp.MesID 
+       <if test="unitID!=null and unitID!=''">
+        and mp.UnitID=#{unitID}
+        </if>
+        <if test="pkId!=null and pkId!=''">
+        and mp.ID=#{pkId}
+        </if> -->
+    </select>
+    
+    
+    
+    
+
+    <!-- 条件查询,得到一个值 -->
+    <select id="selectOneValueByWhere" resultType="String"  parameterType="java.util.HashMap">
+        SELECT COUNT(ID) FROM MeasurePoint
+        <where>
+            <if test=" kind != null and kind != '' ">Kind = #{kind}</if>
+            <if test="name != null and name != '' ">AND Name LIKE "%"+#{name}+"%"</if>
+        </where>
+        ;
+    </select>
+     <select  id="selectlist"  resultMap="MeasurePointMap"  parameterType="java.util.HashMap" >
+			select * from  MeasurePoint
+			
+    </select>
+    <select  id="selectParentListByWhere"  resultMap="MeasurePointMap1"  parameterType="java.util.HashMap" >
+			select ID , Name  , Kind  from  MeasurePoint
+			<if test="Name!=null and Name!='' ">   
+             where Name like '%'+#{name}+'%'
+            </if>
+    </select>
+     <!-- 条件查询,得到多条子记录 -->
+    <select  id="selectChildListByWhere"  resultMap="MeasurePointMap1"  parameterType="measurePoint" >
+				
+					select ID , Name  , Kind   from  MeasurePoint
+				
+				<!-- select A.ID , Code , Name , CollectWay , isEnergy ,
+			B.ID,  PointID , CollectTime ,CollectValue ,isSum
+			 from  CollectPoint  A left join  CollectValue B on PointID=A.ID -->
+			<if test="ID !=null">   
+             where ID=#{ID}
+            </if>
+    </select>
+    
+    
+    <sql id="allColumnsWithAliases">
+        ${tableAlias}.ID as ${columnPrefix}ID,
+        ${tableAlias}.Name as ${columnPrefix}Name,
+        ${tableAlias}.Kind as ${columnPrefix}Kind
+    </sql>
+    
+     <select  id="selectChildListByWheretwo"  resultType="sbzy.enterpriseems.model.domain.EnergyAccountUnit"  parameterType="java.lang.Integer" >
+			select ID,PID,BarCode,Name from EnergyAccountUnit 
+			<if test="_parameter !=null">   
+             where ID=#{_parameter}
+            </if>
+    </select>
+    
+    <select id="selectEnergyMeasruePoint" resultType="sbzy.enterpriseems.model.domain.EnergyMeasurePoint" parameterType="java.lang.Integer" >
+    	select ID, EnergyID, MesID from EnergyMeasurePoint where MesID = #{_parameter}
+    </select>
+     <select id="selectListByWhereMonth" resultMap="MeasurePointMap" parameterType="java.util.HashMap" >
+          select ID,UnitID,Name,Kind,EnergyDirection from  MeasurePoint 
+         <where>
+         <if test="UnitID!=null  and  UnitID!=''">
+           ${UnitID}
+         </if>
+         </where>
+     </select>
+     
+    <!--修改产品规划点的能源核算单元 --> 
+      <select id="updateMeasurePoint" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+       update MeasurePoint set UnitID=#{UnitID},Name=#{name},EnergyDirection=#{EnergyDirection} where ID=#{ID}
+    </select>
+    
+    <!--加载无源产品规划点  -->
+      <select id="selectnomeaterialmeasurepoint" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      
+      select m.*,en.MeaterName from  MeasurePoint m,EnergyAccountUnit e,EnergyAccountUnit e1,MeaterMeasurePoint mp,EntMeater en where m.UnitID=e.ID and  m.ID=mp.MesID and  mp.MeaterID=en.ID and m.Kind=2
+      and e.BarCode like e1.BarCode+'%'  
+      and m.ID not in (select MPointID from MeasureCollect)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if>
+      <if test="meaterial_name!=null and meaterial_name!=''">
+     and en.ID=#{meaterial_name}
+      </if>
+      <if test="name!=null and name!=''">
+     and m.Name like '%'+#{name}+'%'
+      </if>
+    </select>
+     
+     
+    <!--加载无源能源规划点  -->
+      <select id="selectnoenergymeasurepoint" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      select m.*,en.EnterEnergyName from  MeasurePoint m,EnergyAccountUnit e,EnergyAccountUnit e1,EnergyMeasurePoint mp,EntEnergy en where m.UnitID=e.ID and  m.ID=mp.MesID and  mp.EnergyID=en.ID and m.Kind=1
+      and e.BarCode like e1.BarCode+'%'  
+      and m.ID not in (select MPointID from MeasureCollect)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if>
+      <if test="meaterial_name!=null and meaterial_name!=''">
+     and en.ID=#{meaterial_name}
+      </if>
+      <if test="name!=null and name!=''">
+     and m.Name like '%'+#{name}+'%'
+      </if>
+    </select> 
+     
+     
+     
+     
+     
+     
+    <!--加载物料规划点日汇总 -->
+     <select id="selectmeasurepointvalueday" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, em.MeaterName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueDay AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.MeaterMeasurePoint AS mp ON m.ID = mp.MesID LEFT OUTER JOIN
+                dbo.EntMeater AS em ON mp.MeaterID = em.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 2)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if> 
+      <if test="energy_name!=null and energy_name!=''">
+      and em.ID=#{energy_name}
+      </if> 
+      order by md.SumDim desc
+      
+    </select> 
+     
+     <!--加载物料规划点月汇总 -->
+     <select id="selectmeasurepointvaluemonth" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+     SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, em.MeaterName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueMonth AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.MeaterMeasurePoint AS mp ON m.ID = mp.MesID LEFT OUTER JOIN
+                dbo.EntMeater AS em ON mp.MeaterID = em.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 2)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if> 
+       <if test="energy_name!=null and energy_name!=''">
+      and em.ID=#{energy_name}
+      </if> 
+      order by md.SumDim desc
+      </select>
+      
+     <!--加载物料规划点年汇总 -->
+     <select id="selectmeasurepointvalueyear" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, em.MeaterName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueYear AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.MeaterMeasurePoint AS mp ON m.ID = mp.MesID LEFT OUTER JOIN
+                dbo.EntMeater AS em ON mp.MeaterID = em.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 2)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if> 
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if>
+       <if test="energy_name!=null and energy_name!=''">
+      and em.ID=#{energy_name}
+      </if>  
+      
+      order by md.SumDim desc
+    </select> 
+     
+     
+     
+     
+  
+ <!--加载能源规划点日汇总 -->
+     <select id="selectenergymeasurepointvalueday" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+     SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, en.EnterEnergyName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueDay AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.EnergyMeasurePoint AS em ON m.ID = em.MesID LEFT OUTER JOIN
+                dbo.EntEnergy AS en ON em.EnergyID = en.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 1)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if> 
+      <if test="energy_name!=null and energy_name!=''">
+      and en.ID=#{energy_name}
+      </if> 
+     order by md.SumDim desc
+    </select> 
+     
+     <!--加载能源规划点月汇总 -->
+     <select id="selectenergymeasurepointvaluemonth" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+     SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, en.EnterEnergyName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueMonth AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.EnergyMeasurePoint AS em ON m.ID = em.MesID LEFT OUTER JOIN
+                dbo.EntEnergy AS en ON em.EnergyID = en.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 1)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if>
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if> 
+      <if test="energy_name!=null and energy_name!=''">
+      and en.ID=#{energy_name}
+      </if> 
+      order by md.SumDim desc
+      
+      
+      </select>
+     <!--加载能源规划点年汇总 -->
+     <select id="selectenergymeasurepointvalueyear" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      SELECT   m.ID, m.Name, m.Kind, m.EnergyDirection, m.UnitID, m.IsForce, m.caredate, md.ID AS mID, md.SumDim, md.EntityValue, 
+                md.StandardValue, md.EntityAdjValue, md.StandardAdjValue, en.EnterEnergyName
+FROM      dbo.MeasurePoint AS m INNER JOIN
+                dbo.EnergyAccountUnit AS e ON m.UnitID = e.ID INNER JOIN
+                dbo.MeasurePointValueYear AS md ON m.ID = md.MPointID LEFT OUTER JOIN
+                dbo.EnergyMeasurePoint AS em ON m.ID = em.MesID LEFT OUTER JOIN
+                dbo.EntEnergy AS en ON em.EnergyID = en.ID CROSS JOIN
+                dbo.EnergyAccountUnit AS e1
+WHERE   (e.BarCode LIKE e1.BarCode + '%') AND (m.Kind = 1)
+      <if test="EntID!=null and EntID!=''">
+      and ${EntID}
+      </if> 
+      <if test="name!=null and name!=''">
+      and m.Name like '%' +#{name}+ '%'
+      </if> 
+      <if test="unitname!=null and unitname!=''">
+      and e.ID=#{unitname}
+      </if> 
+      <if test="energy_name!=null and energy_name!=''">
+      and en.ID=#{energy_name}
+      </if> 
+      order by md.SumDim desc
+    </select>     
+     
+     
+   <!--在能源规划点修正显示实物量的单位  -->  
+     
+     <select id="selectunitname" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      
+    select m.ID, u.cname from  MeasurePoint m,EnergyMeasurePoint em,EntEnergy en,Energy e,MeasureUnit u where m.ID=em.MesID and em.EnergyID=en.ID
+     and en.EnergyID=e.ID and e.UnitID=u.ID 
+     <if test="ID!=null and ID!=''"></if>
+      and m.ID=#{ID}
+    </select>    
+     
+     <!-- 在产品规划点修正显示实物量的单位  -->
+     <select id="selecmeaterialtunitname" resultMap="MeasurePointMap" parameterType="java.util.HashMap">
+      
+    select mp.ID, u.cname from  MeasurePoint mp,MeaterMeasurePoint mm,EntMeater em,Meaterial e,MeasureUnit u where mp.ID=mm.MesID and mm.MeaterID=em.ID
+     and em.MeaterID=e.ID and e.UnitID=u.ID 
+     <if test="ID!=null and ID!=''"></if>
+      and mp.ID=#{ID}
+    </select>  
+     
+     
+     
+     
+     
+     
+     
+</mapper>
+
+
+
+
+

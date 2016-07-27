@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sbzy.enterpriseems.model.domain.StockBill">
+    <resultMap type="stockbill" id="stockbillMap">
+         <id property="id" column="ID"/>
+         <result property="storageid" column="StorageID"/>
+         <result property="billNum" column="BillNum"/>
+         <result property="busTime" column="BusTime"/>
+         <result property="billTime" column="BillTime"/>
+         <result property="billtype" column="Billtype"/>
+         <result property="memo" column="Memo"/>
+         
+         <association property="storage" column="StorageID" select="selectEAU"/>
+    </resultMap>
+ 
+ <select id="selectEAU" parameterType="int" resultType="EnergyAccountUnit">
+ 	SELECT * FROM EnergyAccountUnit WHERE ID=#{storageid}
+ </select>
+ 
+ 
+ <insert id="insert" parameterType="StockBill" useGeneratedKeys="true" keyProperty="id" keyColumn="GENERATED_KEY" > 
+
+	DECLARE @b Bigint
+	DECLARE @a VARCHAR(11)
+	SET @b=(select max(cast( BillNum  as  Bigint))+1
+	FROM StockBill
+	WHERE Billtype=#{billtype} AND BillNum LIKE (Select CONVERT(varchar(8), GETDATE(), 112))+'%') 
+	if (@b is NULL)
+	BEGIN
+		SET @a= (Select CONVERT(varchar(8), GETDATE(), 112) +'001')
+	END
+	ELSE
+	BEGIN
+		SET @a=cast (@b as varchar(11))
+	END
+
+	INSERT INTO StockBill (StorageID,BillNum,BusTime,BillTime,Billtype,Memo) 
+	VALUES (#{storageid},'00000000',#{busTime},getdate(),#{billtype},#{memo})
+
+	UPDATE StockBill SET BillNum=@a
+	WHERE BillNum='00000000'
+
+</insert>
+
+<update id="update" parameterType="StockBill">
+	UPDATE StockBill SET
+ 	StorageID=#{storageid},BusTime=#{busTime},Memo=#{memo}
+ 	WHERE ID=#{id}
+</update>
+
+
+<delete id="delete" parameterType="int"> 
+	DELETE FROM StockBill WHERE ID=#{id};
+</delete>
+
+<!-- 得到一条数据根据ID-->
+    <select id="selectOneRecord" resultMap="stockbillMap" parameterType="int">
+            select * from StockBill where ID=#{id}
+    </select>
+  
+<!-- 得到全部记录根据不同type -->
+    <select id="selectList" resultMap="stockbillMap">
+            SELECT * from StockBill a LEFT OUTER JOIN EnergyAccountUnit b
+            ON a.ID=b.ID
+            where Billtype=#{billtype}
+            <if test="storagename !=null and storagename !=''">
+            AND  b.Name LIKE '%'+#{storagename}+'%'
+            </if>
+            <if test="billNum !=null and billNum !=''">
+            AND BillNum LIKE '%'+#{billNum}+'%'
+            </if>
+    </select>
+
+    <select id="selectDetail" resultMap="stockbillMap" parameterType="int">
+            select * from BillDetail where BillID=#{id}
+    </select>
+
+</mapper>

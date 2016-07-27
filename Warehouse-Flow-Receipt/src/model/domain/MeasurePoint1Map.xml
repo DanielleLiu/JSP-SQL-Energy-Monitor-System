@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.MeasurePoint1">
+    <resultMap type="measurePoint1" id="MeasurePointMap">
+        <id property="ID" column="ID"/>
+       
+        <result property="Name" column="Name"/>
+        <result property="EnergyDirection" column="EnergyDirection"/>
+        
+         
+       
+    </resultMap>
+    
+    
+
+<!-- 获取规划计量点的最大ID值 -->
+
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sbzy.enterpriseems.model.domain.BillDetail">
+    <resultMap type="billdetail" id="billdetailMap">
+         <id property="id" column="ID"/>
+         <result property="storageEngid" column="StorageEngID"/>
+         <result property="billid" column="BillID"/>
+         <result property="heatvalue" column="HeatValue"/>
+         <result property="heatmultiple" column="Heatmultiple"/>
+         <result property="energyvalue" column="EnergyValue"/>
+         <result property="energymultiple" column="EnergyMultiple"/>
+         <result property="quantity" column="Quantity"/>
+         <result property="sumbalance" column="SumBalance"/>
+         <result property="sumheat" column="SumHeat"/>
+         <result property="sumtce" column="Sumtce"/>
+
+         <association property="stock" column="BillID" select="selectStockBill">
+         	<id property="id" column="ID" />
+		</association>
+        <association property="storage" column="StorageEngID" select="selectSE"/>
+    </resultMap>
+    
+ <select id="selectStockBill" parameterType="int" resultType="StockBill">
+ 	SELECT * FROM StockBill WHERE ID=#{billid}
+ </select>
+ 
+  <select id="selectSE" parameterType="int" resultType="StorageEng">
+ 	SELECT * FROM StorageEng WHERE ID=#{storageEngid}
+ </select>
+
+ 
+ <insert id="insert" parameterType="StockBill" > 
+	INSERT INTO BillDetail (StorageEngID,BillID,HeatValue,Heatmultiple,EnergyValue,EnergyMultiple,Quantity,SumBalance,Sumtce) 
+	VALUES (#{storageEngid},#{billid},#{heatvalue},#{heatmultiple},#{energyvalue},#{energymultiple},#{quantity},#{sumbalance},#{sumheat},#{sumtce})
+	
+</insert>
+
+<update id="update" parameterType="StockBill">
+	UPDATE StockBill SET
+	StorageEngID=#{storageEngid},HeatValue=#{heatvalue},Heatmultiple=#{heatmultiple},EnergyValue=#{energyvalue},EnergyMultiple=#{energymultiple},
+	Quantity=#{quantity},SumBalance=#{sumbalance},Sumtce=#{sumheat}
+	WHERE ID=#{id}
+</update>
+
+
+<delete id="delete" parameterType="int"> 
+	DELETE FROM BillDetail WHERE ID=#{id};
+</delete>
+
+<select id="deletebybillid"  parameterType="java.util.HashMap">
+    delete from BillDetail where BillID=#{billid}
+</select>
+
+<!-- 得到一条数据根据ID-->
+    <select id="selectOneRecord" resultMap="billdetailMap" parameterType="int">
+            select * from BillDetail where ID=#{id}
+    </select>
+  
+<!-- 得到全部记录根据父表单StockBillID -->
+    <select id="selectList" resultMap="billdetailMap">
+            SELECT * from BillDetail WHERE BillID=#{billid}
+    </select> 
+
+</mapper>

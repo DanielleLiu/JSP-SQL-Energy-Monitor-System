@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sbzy.enterpriseems.model.domain.StorageBill">
+    <resultMap type="storagebill" id="StorageBillMap">
+         <id property="id" column="ID"/>
+         <result property="storageID" column="StorageID"/>
+         <result property="billNum" column="BillNum"/>
+          <result property="busTime" column="BusTime"/>
+           <result property="billTime" column="BillTime"/>
+            <result property="billType" column="BillType"/>
+             <result property="memo" column="Memo"/>
+              <association property="unit" column="StorageID" select="seltionUnitbyid">
+              <id property="ID" column="ID"/>
+     		   <result property="Name" column="Name" /> 
+             </association>
+    </resultMap>
+  <!-- 根据能源核算单元查询对象 -->
+    <select  id="seltionUnitbyid"  resultType="sbzy.enterpriseems.model.domain.EnergyAccountUnit"  parameterType="int" >
+			select * from EnergyAccountUnit  where ID=#{storageID}
+    </select>
+    <insert id="insert" parameterType="storagebill" useGeneratedKeys="true" keyProperty="id">
+			insert into StorageBill(StorageID,BillNum,BusTime,BillTime,BillType,Memo) 
+			values(#{storageID},#{billNum},#{busTime},#{billTime},#{billType},#{memo})
+    </insert>
+    <!-- 更新数据 -->
+     <update id="update"  parameterType="storagebill" >     
+			update StorageBill set StorageID=#{storageID},BillNum=#{billNum},BusTime=#{busTime},
+			BillTime=#{billTime},BillType=#{billType},Memo=#{memo}
+			where ID=#{id}
+    </update> 
+    <!-- 删除数据 -->
+    <delete id="delete" parameterType="int">
+			delete  from StorageBill where ID=#{id}
+    </delete>
+    <!-- 查询所有数据 -->
+    <select  id="selectOneRecord"  resultMap="StorageBillMap"  parameterType="int" >
+			select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo  from StorageBill where ID=#{id}
+    </select>
+    
+    <!-- 查询出库单数据 -->
+    <select  id="selectListout"  resultMap="StorageBillMap"  parameterType="java.util.HashMap">
+				 select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo from StorageBill where BillType =-1 and StorageID  in 
+				 (select ID from EnergyAccountUnit where BarCode like #{orgcode}+'%')
+				 
+				 
+			 <if test="storageID != null and storageID != '' and storageID != 0">
+				and StorageID=#{storageID}
+			 </if>
+			 
+			 <if test="billNum != null and billNum != ''">
+				and BillNum like'%'+#{billNum}+'%'
+			 </if>
+    </select>
+     <!-- 查询入库单数据 -->
+    <select  id="selectListjoin"  resultMap="StorageBillMap"  parameterType="java.util.HashMap">
+				 select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo from StorageBill where BillType =1 and StorageID  in 
+				 (select ID from EnergyAccountUnit where BarCode like #{orgcode}+'%')
+				 <if test="storageID != null and storageID != '' and storageID != 0">
+				and StorageID=#{storageID}
+			 </if>
+			 
+			 <if test="billNum != null and billNum != ''">
+				and BillNum like '%'+#{billNum}+'%'
+			 </if>
+    </select>
+     <!-- 查询盘库单数据 -->
+    <select  id="selectListset"  resultMap="StorageBillMap"  parameterType="java.util.HashMap">
+				 select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo from StorageBill where BillType =0 and StorageID  in 
+				 (select ID from EnergyAccountUnit where BarCode like #{orgcode}+'%')
+				 <if test="storageID != null and storageID != '' and storageID != 0">
+				and StorageID=#{storageID}
+			 </if>
+			 
+			 <if test="billNum != null and billNum != ''">
+				and BillNum like '%'+#{billNum}+'%'
+			 </if>
+    </select>
+     <!-- 根据主键ID查询数据 -->
+    <select  id="selectOneR"  resultMap="StorageBillMap"  parameterType="int" >
+			select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo from StorageBill where ID=#{id}
+    </select>
+        <!-- 选择仓库自动生成的单据编号 （年、月、日、3位数字流水号）-->
+    <select  id="selectbybillNum"  resultMap="StorageBillMap"  parameterType="java.util.HashMap" >
+			select ID,StorageID,BillNum,BusTime,BillTime,BillType,Memo from StorageBill
+			 where StorageID=#{storageID} and BillNum like #{billNum}+'%' and BillType=#{billType}
+			 ORDER BY BillNum DESC
+    </select>
+</mapper>
+
+
+
+
