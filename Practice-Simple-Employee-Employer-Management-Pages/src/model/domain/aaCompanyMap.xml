@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.aaCompany">
+<!-- 本地property,SQLcolumn -->
+    <resultMap type="aaCompany" id="aaCompanyMap">
+        <id property="id" column="ID"/>
+        <result property="name" column="Name" />
+        <result property="code" column="Code"/>
+		<result property="address" column="Address" />
+		<result property="phone" column="Phone" />
+		<result property="postcode" column="Postcode" />
+		<result property="owner" column="Owner" />
+		<result property="time" column="Time" />
+		<result property="type" column="Type" />
+		<result property="type1" column="Type1"/>
+		<association property="enttype" column="Type" select="seltypename">
+		<id property="id" column="ID" />
+		<result property="pid" column="PID" />
+		<result property="code" column="Code" />
+		<result property="name" column="Name" />
+		<result property="syscode" column="SysCode" />
+		</association>
+		<!-- 根据type为ID选择EntRegType表中的名字，映射到entname,直接显示 -->
+		<association property="entname" column="Type" select="selectEntname">
+		
+		</association>
+    </resultMap>
+
+ <select id="selectEntname" resultType="String"  parameterType="int">
+	SELECT Name from EntRegType WHERE id=#{type}
+ </select>
+ 
+    
+  <select id="seltypename" resultType="entregtype" parameterType="int">
+  select * from EntRegType where id=#{type}
+  </select>    
+  
+<insert id="insert" parameterType="aaCompany" >
+	INSERT INTO aaCompany (Name,Code,Type,Address,Phone,Postcode,Owner,Time,Type1) 
+	VALUES (#{name},#{code},#{type},#{address},#{phone},#{postcode},#{owner},getdate(),#{type1})
+</insert>
+
+<update id="update" parameterType="aaCompany">
+	UPDATE aaCompany SET
+ 	Name=#{name},Code=#{code},Type=#{type},Address=#{address},Phone=#{phone},Postcode=#{postcode},Owner=#{owner},Type1=#{type1}
+ 	WHERE ID=#{id}
+</update>
+
+
+<delete id="delete" parameterType="int"> 
+	DELETE FROM aaCompany WHERE ID=#{id};
+</delete>
+<!-- 根据用户编号删除，所有信息删除？ parameterType java.util.HashMap?  -->
+
+
+<!-- 得到一条数据根据ID-->
+    <select id="selectOneRecord" resultMap="aaCompanyMap" parameterType="int">
+            select * from aaCompany where ID=#{id}
+    </select>
+  
+<!-- 得到全部记录 -->
+    <select id="selectList" resultMap="aaCompanyMap">
+            select * from aaCompany where 1=1
+            <if test="companyname !=null and companyname !=''">
+            AND Name LIKE '%'+#{companyname}+'%'
+            </if>
+            <if test="code !=null and code!=''">
+            AND Code LIKE '%'+#{code}+'%'
+            </if>
+            <if test="postcode !=null and postcode!=''">
+            AND Postcode=#{postcode}
+            </if>
+            <if test="type !=null and type !='' and type !=0 ">
+            AND Type=#{type}
+            </if>
+    </select>
+
+
+</mapper>

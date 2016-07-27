@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.aaCompanyEnergyRelation">
+<!-- 本地property,SQLcolumn -->
+    <resultMap type="aaCompanyEnergyRelation" id="aaCompanyEnergyRelationMap">
+        <id property="id" column="ID"/>
+        <result property="energyid" column="energyID" />
+        <result property="companyid" column="CompanyID"/>
+      	
+      	<association property="aacompany" column="CompanyID" select="selectCompany"/>
+		<association property="aaenergy" column="EnergyID" select="selectEnergyCurr"/>  
+        
+    </resultMap>
+
+<select id="selectCompany" parameterType="int" resultType="aaCompany">
+	SELECT * FROM aaCompany WHERE ID=#{companyid}
+</select>
+
+<select id="selectEnergyCurr" parameterType="int" resultType="aaEnergy">
+	SELECT * FROM aaEnergy WHERE ID=#{energyid}
+</select>
+
+
+<!-- 根据companyID选择能源-->
+    <select id="selectEnergy" resultMap="aaCompanyEnergyRelationMap" parameterType="java.util.HashMap">
+    	select * from aaCompanyEnergyRelation where CompanyID=#{unitid}
+    </select>
+
+<!-- 根据companyID删除CER表中的数据， 需要pass map作为parameter，删除条件不是PK ID 而是companyid 使用service中的selectByWhere方法-->    
+    <select id="deletebyunitid"  parameterType="java.util.HashMap">
+            delete from aaCompanyEnergyRelation where CompanyID=#{companyid}
+    </select>
+    
+ <!-- 根据companyID选择能源ID, 网页端传递过来的CompanyID 命名为unitid 存入HashMap 作为parameter调用该方法, 不能在selectListByWhere中使用，service要求returntype object not string-->   
+ <!-- select id="selectEnergyId"  resultType="String" parameterType="javal.util.HashMap">
+ 	SELECT EnergyID from aaCompanyEnergyRelation WHERE CompanyID=#{unitid}
+ </select-->  
+      
+<insert id="insert" parameterType="aaCompanyEnergyRelation" >
+	INSERT INTO aaCompanyEnergyRelation (energyID,companyID) 
+	VALUES (#{energyid},#{companyid})
+</insert>
+
+<update id="update" parameterType="aaCompanyEnergyRelation">
+	UPDATE aaCompanyEnergyRelation SET
+ 	EnergyID=#{energyid},CompanyID=#{companyid}
+ 	WHERE ID=#{id}
+</update>
+
+
+<delete id="delete" parameterType="int"> 
+	DELETE FROM aaCompanyEnergyRelation WHERE ID=#{id};
+</delete>
+<!-- 根据用户编号删除，所有信息删除？ parameterType java.util.HashMap?  -->
+
+
+<!-- 得到一条数据根据ID-->
+    <select id="selectOneRecord" resultMap="aaCompanyEnergyRelationMap" parameterType="int">
+            select * from aaCompanyEnergyRelation where ID=#{id}
+    </select>
+    
+
+  
+<!-- 得到全部记录 -->
+        <select id="selectList" resultMap="aaCompanyEnergyRelationMap">
+            select * from aaCompanyEnergyRelation a LEFT OUTER JOIN aaCompany b
+            	ON a.companyID=b.ID
+            where 1=1
+            <if test="energyid !=null and energyid !='' and energyid !=0 ">
+			 AND EnergyID = #{energyid}
+            </if>
+            <if test="companyname !=null and companyname !='' ">
+            AND b.Name LIKE '%'+#{companyname}+'%'
+            </if>
+            
+            <!-- if test="companyid !=null and companyid !='' and companyid !=0 ">
+			 AND CompanyID = #{companyid}
+            </if-->
+            
+    </select>
+
+
+</mapper>

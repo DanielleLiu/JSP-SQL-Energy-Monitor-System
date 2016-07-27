@@ -1,0 +1,107 @@
+﻿<!-- 路径：\EMSDataCenter\WebRoot\WEB-INF\classes\sbzy\enterpriseems\conf\mybatis-->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <setting name="cacheEnabled" value="true"/>
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <setting name="logImpl" value="LOG4J"/>
+    </settings>
+    <!-- 别名 -->
+    <typeAliases>
+      <typeAlias type="sbzy.enterpriseems.model.domain.Account" alias="account"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.Users" alias="users"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.Menu" alias="menu"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.CmpIndustryKind" alias="cmpIndustryKind"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.KPIKind" alias="KPIKind"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EntYearSaveGoal" alias="entYearSaveGoal"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyUseSort" alias="energyUseSort"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyKind" alias="energyKind"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyKindWay" alias="energyKindWay"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.StdIndustryKind" alias="stdIndustryKind"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.Role" alias="role"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.ContryMajorEnt" alias="contrymajorent"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.InstrrmentModel" alias="instrrmentModel"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.MeasureUnit" alias="measureUnit"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.MeaterKind" alias="meaterkind"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyAlarmPara" alias="energyAlarmPara"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyKPI" alias="energyKPI"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePoint" alias="measurePoint"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePoint1" alias="measurePoint1"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.KPIRecord" alias="kPIRecord"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.EnergyAlarmKPI" alias="energyAlarmKPI"/>
+      <typeAlias type="sbzy.enterpriseems.model.domain.Meaterial" alias="meaterial"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.Energy" alias="energy"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.YearPlan" alias="yearPlan"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.EnergyCconsumptionUnit" alias="energycconsumptionunit"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.Regionalism" alias="regionalism"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.EnergyAccountUnit" alias="energyaccountunit"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.BenchmarkRec" alias="benchmarkRec"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.MeasureEttalon" alias="measureettalon"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.MeasureStd" alias="measureStd"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.EnergyMeasureInstrument" alias="energyMeasureInstrument"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.EntSavePlan" alias="entsaveplan"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.EttalonRecord" alias="ettalonRecord"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.ReplaceRecord" alias="replacerecord"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.VerifyRecord" alias="verifyrecord"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.AuthorizeRecord" alias="authorizeRecord"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.CollectCycle" alias="collectCycle"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.Permission" alias="permission"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.UnitChange" alias="unitChange"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.CollectPoint" alias="collectpoint"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.CollectTask" alias="collecttask"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.LocalMagorEnt" alias="localMagorEnt"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.CollectValue" alias="collectvalue"/>
+           <typeAlias type="sbzy.enterpriseems.model.domain.NumberReader" alias="numberReader"/>
+            <typeAlias type="sbzy.enterpriseems.model.domain.SecondMeasureSite" alias="secondmeasuresite"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePointValueYear" alias="measurepointvalueyear"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePointValueMonth" alias="measurepointvaluemonth"/>
+         <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePointValueDay" alias="measurepointvalueday"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.Permission" alias="permission"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.EntMeater" alias="entMeater"/>
+          <typeAlias type="sbzy.enterpriseems.model.domain.AccountRoleList" alias="accountRoleList"/>
+           <typeAlias type="sbzy.enterpriseems.model.domain.Permission" alias="permission"/>
+           <typeAlias type="sbzy.enterpriseems.model.domain.EntEnergy" alias="entenergy"/>
+       <typeAlias type="sbzy.enterpriseems.model.domain.MeasureSite" alias="measuresite"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.EnergyNet" alias="energynet"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.MeasureCollect" alias="measurecollect"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.NetFlow" alias="netflow"/>
+        <typeAlias type="sbzy.enterpriseems.model.domain.MeasureInstrumentsWay" alias="measureInstrumentsWay"/>  
+         <typeAlias type="sbzy.enterpriseems.model.domain.EnergySort" alias="energySort"/>  
+         <typeAlias type="sbzy.enterpriseems.model.domain.EnergyValue" alias="energyvalue" />
+         <typeAlias type="sbzy.enterpriseems.model.domain.RolePermissionList" alias="rolepermissionlist" />
+         <typeAlias type="sbzy.enterpriseems.model.domain.RecKPIKind" alias="recKPIKind" />
+         <typeAlias type="sbzy.enterpriseems.model.domain.LocalMagEnt" alias="localmagent" />
+           <typeAlias type="sbzy.enterpriseems.model.domain.ContryMagEnt" alias="contrymagent" />
+           <typeAlias type="sbzy.enterpriseems.model.domain.EntRoleList" alias="entRoleList" />
+            <typeAlias type="sbzy.enterpriseems.model.domain.PointInstrument" alias="pointInstrument" />
+             <typeAlias type="sbzy.enterpriseems.model.domain.StandardUnit" alias="standardunit" />
+             <typeAlias type="sbzy.enterpriseems.model.domain.AccountEntList" alias="accountEntList" />
+              <typeAlias type="sbzy.enterpriseems.model.domain.MeaterSort" alias="meaterSort" />
+                <typeAlias type="sbzy.enterpriseems.model.domain.MeaterMeasurePoint" alias="meatermeasurepoint" />
+                 <typeAlias type="sbzy.enterpriseems.model.domain.KPIPoint" alias="kpiPoint" />
+         <typeAlias type="sbzy.enterpriseems.model.domain.UnitMeasurePoint" alias="unitMeasurePoint" />
+         <typeAlias type="sbzy.enterpriseems.model.domain.AlarmRegion" alias="alarmregion" />
+          <typeAlias type="sbzy.enterpriseems.model.domain.AlarmEnt" alias="alarment" />
+           <typeAlias type="sbzy.enterpriseems.model.domain.AlarmIndustry" alias="alarmindutry"/>
+            <typeAlias type="sbzy.enterpriseems.model.domain.DateUnit" alias="dateunit"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.InstrumentsNet" alias="instrumentsNet"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.VEnergyMeasureInstrument" alias="venergymeasureinstrument"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.CommonCycle" alias="commoncycle"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.SupportUnit" alias="supportunit"/>
+              <typeAlias type="sbzy.enterpriseems.model.domain.SupportAccount" alias="supportaccount"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.SupportUnit" alias="supportunit"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.MeasurePoint1" alias="measurePoint1"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.EntRegType" alias="entregtype"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.SupportEnt" alias="supporent"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.Employee" alias="employee"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.aaEnergy" alias="aaEnergy"/>
+             <typeAlias type="sbzy.enterpriseems.model.domain.aaCompany" alias="aaCompany"/>   
+             <typeAlias type="sbzy.enterpriseems.model.domain.aaCompanyEnergyRelation" alias="aaCompanyEnergyRelation"/>          
+    </typeAliases>
+
+
+
+</configuration>

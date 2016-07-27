@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.AccountEntList">
+    <resultMap type="accountEntList" id="AccountEntListMap">
+        <id property="ID" column="ID"/>
+        <result property="energyCconsumptionUnitID" column="EntID"/>
+        <result property="accountID" column="AccountID"/>
+    </resultMap>
+
+    <!-- 在用户管理中使用到，王佰宏，2015-09-04 -->
+    <resultMap type="accountEntList" id="AccountEntListForAccountMap">
+        <id property="ID" column="ID"/>
+        <result property="energyCconsumptionUnitID" column="EntID"/>
+        <result property="accountID" column="AccountID"/>
+        <association property="EnergyCconsumptionUnit" column="EntID" select="selectNergyCconsumptionUnit"></association>
+        <association property="account" column="AccountID" select="selectAccount"></association>
+    </resultMap>
+    
+    
+    <select id="selectNergyCconsumptionUnit" resultType="energycconsumptionunit" parameterType="int">
+       select * from EnergyCconsumptionUnit where ID=#{energyCconsumptionUnitID}
+    </select>
+    <select id="selectAccount" resultType="account" parameterType="int">
+       select * from Account where ID=#{accountID}
+    </select>
+     <!-- 跟新删除数据 -->
+     <delete id="seletebyentid" parameterType="java.util.HashMap">
+     	delete AccountEntList where EntID=#{EnergyCconsumptionUnitID};
+     </delete>
+     
+     
+    <sql id="indexColumns"> ID </sql>
+    <sql id="dataColumns"> EntID, AccountID </sql>
+    <sql id="allColumns">
+        <include refid="indexColumns"></include>
+        ,
+        <include refid="dataColumns"></include>
+    </sql>
+    <sql id="paramValues"> #{energyCconsumptionUnitID}, #{accountID} </sql>
+    <sql id="setParamValues"> EntID = #{energyCconsumptionUnitID}, AccountID = #{accountID} 
+    </sql>
+     <!-- 根据站好模糊查询 -->
+<select id="sellistbyregionname" resultMap="AccountEntListForAccountMap" parameterType="java.util.HashMap">
+select * from AccountEntList where AccountID in (select ID from Account where RealName LIKE '%'+#{regionname}+'%'
+</select>
+    <!-- 插入单个记录 -->
+    <insert id="insert" >
+        INSERT INTO AccountEntList (
+        <include refid="dataColumns"></include>
+        ) VALUES (
+        <include refid="paramValues"></include>
+        );
+    </insert>
+     <!-- 查询所有数据 -->
+<select id="sellist" resultMap="AccountEntListForAccountMap" parameterType="java.util.HashMap">
+select * from AccountEntList 
+</select>
+    <!-- 更新单个记录 -->
+    <update id="update">
+        UPDATE AccountEntList SET
+        <include refid="setParamValues"></include>
+        WHERE ID = #{ID};
+
+    </update>
+      <!-- 根据用户编号查询数据 -->
+<select id="sellistbyaccontid" resultMap="AccountEntListMap" parameterType="java.util.HashMap">
+
+select * from AccountEntList where accountID=#{accountid}
+</select>
+    <!-- 删除一条记录 -->
+    <delete id="delete">
+        DELETE FROM AccountEntList WHERE ID = #{ID};
+    </delete>
+    <!-- 根据用户编号删除 -->
+    <delete id="deletebyaccounid" parameterType="java.util.HashMap">
+        DELETE FROM AccountEntList WHERE AccountID = #{accountid};
+    </delete>
+
+    <!-- 删除多条记录 -->
+    <delete id="deleteAll" >
+        <!-- ODO(李昊,2015年7月31日): IN (${}) 应改写为 foreach -->
+        <bind name="delIds" value="_parameter.toString()"/>
+        DELETE FROM AccountEntList WHERE ID IN (${delIds});
+    </delete>
+
+    <!-- 条件查询,得到全部记录 -->
+    <select id="selectList" resultMap="AccountEntListMap">
+        SELECT
+        <include refid="allColumns"></include>
+        FROM AccountEntList;
+    </select>
+
+    <!-- 条件查询,得到一条记录 -->
+    <select id="selectOneRecord" resultMap="AccountEntListMap">
+        SELECT
+        <include refid="allColumns"></include>
+        FROM AccountEntList
+        WHERE
+        ID = #{ID};
+    </select>
+
+    <!-- 条件查询,得到多条记录 -->
+    <select id="selectListByWhere" resultMap="AccountEntListMap"
+        parameterType="java.util.HashMap"
+    >
+        SELECT
+        <include refid="allColumns"></include>
+        FROM AccountEntList
+        <where>
+            <if test="ID != null and ID != ''">AND ID = #{ID}</if>
+        </where>
+        ;
+    </select>
+
+    <!-- 条件查询,得到一个值 -->
+    <select id="selectOneValueByWhere" resultType="String"  parameterType="java.util.HashMap">
+        SELECT COUNT(ID) FROM AccountEntList
+        <where>
+            <if test="ID != null and ID != ''">AND ID = #{ID}</if>
+        </where>
+        ;
+    </select>
+
+    <resultMap type="accountEntList" id="AccountEntListEditMap" extends="AccountEntListMap">
+        <association property="energyCconsumptionUnit"
+            resultMap="sbzy.enterpriseems.model.domain.EnergyCconsumptionUnit.energycconsumptionunitBasicInfoMap"
+            columnPrefix="energyCconsumptionUnit_"/>
+        <association property="account" resultMap="sbzy.enterpriseems.model.domain.Account.AccountMap"
+            columnPrefix="account_"/>
+    </resultMap>
+
+    <sql id="allColumnsWithAliases">
+        ${tableAlias}.ID as ${columnPrefix}ID,
+        ${tableAlias}.EntID as ${columnPrefix}EntID,
+        ${tableAlias}.AccountID as ${columnPrefix}AccountID
+    </sql>
+
+    <sql id="selectForEditPage">
+        SELECT
+        <bind name="tableAlias" value="'T'" />
+        <bind name="columnPrefix" value="''" />
+        <include refid="allColumnsWithAliases"></include>
+        ,
+        <bind name="tableAlias" value="'E'" />
+        <bind name="columnPrefix" value="'energyCconsumptionUnit_'" />
+        <include refid="sbzy.enterpriseems.model.domain.EnergyCconsumptionUnit.allBasicInfoColumnsWithAliases"></include>
+        ,
+        <bind name="tableAlias" value="'A'" />
+        <bind name="columnPrefix" value="'account_'" />
+        <include refid="sbzy.enterpriseems.model.domain.Account.allColumnsWithAliases"></include>
+        FROM
+        AccountEntList T
+        LEFT OUTER JOIN EnergyCconsumptionUnit E ON
+        T.EntID = E.ID
+        LEFT OUTER JOIN Account A ON
+        T.AccountID = A.ID
+    </sql>
+
+        <select id="selectOneForEditPage" resultMap="AccountEntListEditMap">
+        <include refid="selectForEditPage"></include>
+        WHERE
+        T.ID=#{ID}
+    </select>
+
+    <select id="selectListForEditPage" resultMap="AccountEntListEditMap"
+        parameterType="map"
+    >
+        <include refid="selectForEditPage"></include>
+        <where>
+            <if test="account != null and account != ''">A.Account LIKE '%'+#{account}+'%'</if>
+        </where>
+    </select>
+<select id="deletevalidate" resultMap="AccountEntListEditMap"
+		parameterType="java.util.HashMap">
+		
+		select ID,EntID from AccountEntList 
+		<where>
+			<if test="ID!= null and ID!='' ">
+				and EntID=#{ID}
+			</if>
+		</where>
+
+	</select>
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.aaEnergy">
+<!-- 本地property,SQLcolumn -->
+    <resultMap type="aaEnergy" id="aaEnergyMap">
+        <id property="id" column="ID"/>
+        <result property="name" column="Name" />
+        <result property="code" column="Code"/>
+		<result property="standard" column="Standard" />
+	</resultMap>
+
+      
+<insert id="insert" parameterType="aaEnergy" >
+	INSERT INTO aaEnergy (Name, Code, Standard) 
+	VALUES (#{name},#{code},#{standard})
+</insert>
+
+<update id="update" parameterType="aaEnergy">
+	UPDATE aaEnergy SET
+ 	Name=#{name},Code=#{code},Standard=#{standard}
+ 	WHERE ID=#{id}
+</update>
+
+
+<delete id="delete" parameterType="int"> 
+	DELETE FROM aaEnergy WHERE ID=#{id};
+</delete>
+<!-- 根据用户编号删除，所有信息删除？ parameterType java.util.HashMap?  -->
+
+
+<!-- 得到一条数据根据ID-->
+    <select id="selectOneRecord" resultMap="aaEnergyMap" parameterType="int">
+            select * from aaEnergy where ID=#{id}
+    </select>
+  
+<!-- 得到全部记录,如果输入条件按条件查询 -->
+    <select id="selectList" resultMap="aaEnergyMap">
+            select * from aaEnergy where 1=1
+            <if test="search_name !=null and search_name!=''">
+            AND Name LIKE '%'+#{search_name}+'%'
+            </if>
+            <if test="code !=null and code!=''">
+            AND Code LIKE '%'+#{code}+'%'
+            </if>
+    </select>
+
+</mapper>

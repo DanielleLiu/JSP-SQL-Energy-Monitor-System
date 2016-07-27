@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sbzy.enterpriseems.model.domain.Account">
+
+    <resultMap type="account" id="AccountMap">
+        <id property="ID" column="ID"/>
+        <result property="Account" column="Account"/>
+        <result property="Password" column="Password"/>
+        <result property="State" column="State"/>
+        <result property="RealName" column="RealName"/>
+        <result property="CompanyName" column="CompanyName"/>
+        <!--虚字段仅供查询使用  -->
+        <result property="DepName" column="DepName"/> 
+        <association property="tionUnit" column="ID" select="seltionUnitbyid"></association>
+    </resultMap>
+
+    <resultMap type="account" id="AccountMap1">
+        <id property="ID" column="ID"/>
+        <result property="Account" column="Account"/>
+        <result property="Password" column="Password"/>
+        <result property="State" column="State"/>
+         <result property="RealName" column="RealName"/>
+        <collection property="children" ofType="account"
+            select="selectChildListByWhere"
+            column="{ID=ID,Account=Account,Password=Password,State=State}"
+        >
+        </collection>
+    </resultMap>
+
+
+
+
+   <!-- <select id="getAccount" parameterType="account" resultMap="AccountMap"> 
+        select * from account where accountid = #{paramx} </select> -->
+<select id="seltionUnitbyid" resultType="energycconsumptionunit" parameterType="int">
+select * from EnergyCconsumptionUnit where ID =(select EntID from AccountEntList where AccountID=#{ID})
+</select>
+ <!-- 查询最大ID的值 -->
+<select id="selmaxaccont" resultMap="AccountMap" parameterType="java.util.HashMap">
+select  ID from Account where id=(select MAX(ID) from Account)
+</select>
+    <sql id="indexColumns"> ID </sql>
+    <sql id="dataColumns"> Account,Password,State,RealName,DepName </sql>
+    <sql id="allColumns">
+        <include refid="indexColumns"></include>
+        ,
+        <include refid="dataColumns"></include>
+    </sql>
+    <sql id="paramValues"> #{account}, #{password}, #{state},#{RealName},#{DepName} </sql>
+    <sql id="setParamValues"> Account = #{Account}, Password = #{Password}, State =
+        #{State},RealName=#{RealName},DepName=#{DepName}
+    </sql>
+    
+    
+    <!-- 插入数据 -->
+    <insert id="insert" parameterType="account">
+
+        insert into Account(
+        <include refid="dataColumns"></include>
+        )
+        values(
+        <include refid="paramValues"></include>
+        )
+    </insert>
+    <!-- 更新数据 -->
+    <update id="update" parameterType="account">
+
+        update Account set
+        <include refid="setParamValues"></include>
+        where ID=#{ID}
+
+    </update>
+    <!-- 删除数据 -->
+    <delete id="delete" parameterType="int">
+
+        delete from Account where
+        ID=#{ID}
+
+    </delete>
+    <!-- 条件查询,得到一个值 -->
+    <select id="selectOneValueByWhere" resultType="String"
+        parameterType="java.util.HashMap"
+    >
+        select count(userID) from T_Users
+        <where>
+            <if test="account != null and account != ''">Account LIKE '%'+#{account}+'%'</if>
+        </where>
+    </select>
+    <!-- 条件查询,得到一条记录 -->
+    <select id="selectOneRecord" resultMap="AccountMap"
+        parameterType="int"
+    >
+
+        select
+        <include refid="allColumns"></include>
+        from Account where ID=#{ID}
+
+    </select>
+
+    <!-- 条件查询,得到全部记录 -->
+    <select id="selectList" resultMap="AccountMap">
+       <!-- select * from  Account -->
+        select a.*,e.CompanyName from Account a,AccountEntList ae,EnergyCconsumptionUnit e where a.ID=ae.AccountID and ae.EntID=e.ID
+       
+    </select>
+
+    <!-- 条件查询,得到多条记录 -->
+    <select id="selectListByWhere" resultMap="AccountMap" parameterType="java.util.HashMap">
+        select a.*,e.CompanyName from Account a,AccountEntList ae,EnergyCconsumptionUnit e where a.ID=ae.AccountID and ae.EntID=e.ID
+        <if test="account != null and account != ''">
+       and a.Account LIKE '%'+#{account}+'%'
+        </if>
+         <if test="unitname != null and unitname != ''">
+       and e.CompanyName LIKE '%'+#{unitname}+'%'
+        </if>
+    </select>
+
+    <select id="selectParentListByWhere" resultMap="AccountMap1"
+        parameterType="java.util.HashMap"
+    >
+        select a.ID,a.Account,a.Password,a.State from Account a,AccountEntList t 
+        <where>
+        <if test="Name!=null and Name!='' ">
+            and name like '%'+#{name}+'%'
+        </if>
+         <if test="EntID!=null and EntID!='' ">
+            and ${EntID} and a.id=T.AccountID
+        </if>
+        </where>
+        <if test="Name!=null and Name!='' ">
+            where name like '%'+#{name}+'%'
+        </if>
+    </select>
+    <!-- 条件查询,得到多条子记录 -->
+    <select id="selectChildListByWhere" resultMap="AccountMap1"
+        parameterType="account"
+    >
+        select ID,Account,Password,State from Account
+        <if test="ID !=null">
+            where ID=#{ID}
+        </if>
+    </select>
+
+    <sql id="allColumnsWithAliases">
+        ${tableAlias}.ID as ${columnPrefix}ID,
+        ${tableAlias}.Account as ${columnPrefix}Account,
+        ${tableAlias}.Password as ${columnPrefix}Password,
+        ${tableAlias}.RealName as ${columnPrefix}RealName,
+        ${tableAlias}.DepName as ${columnPrefix}DepName,
+        ${tableAlias}.State as ${columnPrefix}State
+    </sql>
+
+
+<!-- 以下面的ResultMap,AccountRoleList中AccountID或RoleID不存在对应项的行不会被显示:不存在的account将会被忽略；accountID存在对应项但roleID不存在对应项，关联行在更新account和role关系时将被删除 -->
+<!-- 一个以AccountRoleList为主表串起三张表的OUTER JOIN可以返回不存在的account和role,但是没有在AccountRoleList里的account不会被返回，需要用FULL JOIN? -->
+    <resultMap type="account" id="AccountRolesEditMap"
+        extends="AccountMap"
+    >
+        <collection property="roles"
+            resultMap="sbzy.enterpriseems.model.domain.Role.RoleMap"
+            columnPrefix="role_"/>
+        <collection property="roleIDs" ofType="integer"
+            columnPrefix="role_" 
+        >
+            <result property="" column="ID"/>
+        </collection>
+    </resultMap>
+
+    <sql id="selectForRolesEditPage">
+        SELECT
+        <bind name="tableAlias" value="'T'"/>
+        <bind name="columnPrefix" value="''"/>
+        <include refid="allColumnsWithAliases"></include>
+        ,
+        <bind name="tableAlias" value="'R'"/>
+        <bind name="columnPrefix" value="'role_'"/>
+        <include
+            refid="sbzy.enterpriseems.model.domain.Role.allColumnsWithAliases"
+        ></include>
+        FROM
+        Account T
+        LEFT OUTER JOIN AccountRoleList L ON
+        T.ID =
+        L.AccountID
+        LEFT OUTER JOIN Role R ON
+        L.RoleID = R.ID
+    </sql>
+
+    <select id="selectOneForRolesEditPage" resultMap="AccountRolesEditMap">
+        <include refid="selectForRolesEditPage"></include>
+        WHERE T.ID =#{ID}
+    </select>
+
+    <select id="selectListForRolesEditPage" resultMap="AccountRolesEditMap"
+        parameterType="map"
+    >
+        <include refid="selectForRolesEditPage"></include>
+        <where>
+            <if test="account != null and account != ''">T.Account LIKE '%'+#{account}+'%'</if>
+        </where>
+    </select>
+    
+    <!-- 返回登录相关信息,王佰宏,2015-09-22 -->
+    <!--  <resultMap type="sbzy.enterpriseems.model.domain.AccountForLogin" id="AccountForLoginMap">
+        <result property="AccountID" column="AccountID"/>
+        <result property="RoleID" column="RoleID"/>
+        <result property="RealName" column="RealName"/>
+        <result property="Kind" column="Kind"/>
+        <result property="EntID" column="EntID"/>
+    </resultMap> -->
+    <!-- 条件查询,验证登录用户是否合法,过滤掉超级管理员登录系统，王佰宏,2015-08-26 -->
+    <!-- 此部分功能已移到AccountRoleList中，王佰宏,2015-09-26 -->
+    <select  id="checkAccount"  resultType="java.util.HashMap"  parameterType="java.util.HashMap" >
+    <![CDATA[
+    select a.AccountID,a.RoleID,a.RealName,a.Kind,b.EntID from VAccountRoleList a left join AccountEntList b on a.AccountID=b.AccountID
+	where Account=#{userAccount} and Password=#{passWord} and State=1 
+		]]>
+    </select>
+     <select id="selectListByEntryWhere" resultType="account"
+        parameterType="account"
+    >
+	      select ID,Account,Password,State from Account
+        <where>
+            <if test="Account != null and !&quot;&quot;.equals(Account)"> and  Account=#{Account}</if>
+            
+        </where>
+    </select>  
+     <!-- 根据用户所属企业查询企业下的所有用户 -->
+    <select id="selectListbyent" resultMap="AccountMap" parameterType="java.util.HashMap">
+    
+        select * from Account where ID in(select AccountID from AccountEntList where ${EntID})
+         <if test="account != null and account != ''">
+       and Account LIKE '%'+#{account}+'%'
+        </if>
+    </select>
+    
+    <select id="selectParentListByAnyOne" resultType="account"
+        parameterType="java.util.HashMap"
+    >
+        select ID,Account,Password,State from Account
+       <where>
+        <if test="key.account!=null and !''.equals(key.account.trim()) ">
+          and  Account =#{key.Account}
+        </if>
+         <if test="key.password!=null and !''.equals(key.password.trim()) ">
+          and  Password =#{key.password}
+        </if>
+       </where>
+       
+    </select>
+    
+</mapper>
